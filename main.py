@@ -3,43 +3,63 @@ import numpy as np
 from scipy.special import factorial
 from dash import Dash, html, dash_table, dcc, callback, Output, Input
 import taylor
+import pandas as pd
 
-N=20
+N = 10
+N+=1
+x_min = -5
+x_max = 5
+num_points = 100
 
-def main():
-    # Create an instance of the TaylorSeries class
-    ts = taylor.TaylorSeries(N=N, x_min=-5, x_max=5, num_points=100)
-    
-    # Generate the Taylor approximation for cos(x)
-    partial_sums = ts.cos_taylor()
-    
+#Generate TaylorSeries object
+ts = taylor.TaylorSeries(N=N, x_min=x_min, x_max=x_max, num_points=num_points)
 
-    # Plot the result
-    fig = ts.plot_taylor(partial_sums, N_values=[0], y_min=-2, y_max=2,true_function=np.cos)
-    fig.update_layout(showlegend=True)
-    app = Dash()
+#Create figures for selected functions
+fig_cos = ts.create_fig(ts.cos_taylor())
+fig_sin = ts.create_fig(ts.sin_taylor())
+fig_exp = ts.create_fig(ts.exp_taylor())
 
-    app.layout = html.Div(children=[
-        html.H1(children='Dashboard'),
+app = Dash()
 
-        html.Div(children='''
-        Dash: A web application framework for your data.
-        '''),
+app.layout = html.Div(children=[
+    html.H1(children='Maclauren series intereactive examples'),
+    dcc.Graph(id='cos_graph', figure = fig_cos),
+    dcc.Slider(0,N-1,1,value = 0, id='cos_slider'),
 
-        dcc.Graph(
-            id='example-graph',
-            figure=fig
-        ),
-        dcc.Slider(0,N,1,value = 0, id='order')
+    dcc.Graph(id='sin_graph', figure = fig_sin),
+    dcc.Slider(0,N-1,1,value = 0, id='sin_slider'),
+
+    dcc.Graph(id='exp_graph', figure = fig_exp),
+    dcc.Slider(0,N-1,1,value = 0, id='exp_slider')
+
+
     ])
 
-    
-    
-    @callback(
-        Output('example-graph','figure'),
-        Input('order','value'))
-    def update_figure(selected_order):
-        return ts.plot_taylor(partial_sums, N_values=np.arange(0,selected_order+1), y_min=-2, y_max=2,true_function=np.cos)
-    app.run(debug=True)
-if __name__ == "__main__":
-    main()
+@callback(
+    Output('cos_graph','figure'),
+    Input('cos_slider','value'))
+def update_figure(selected_value):
+
+    for i, trace in enumerate(fig_cos.data):
+        trace.visible = True if i <= selected_value else False
+    return fig_cos
+
+@callback(
+    Output('sin_graph','figure'),
+    Input('sin_slider','value'))
+def update_figure(selected_value):
+
+    for i, trace in enumerate(fig_sin.data):
+        trace.visible = True if i <= selected_value else False
+    return fig_sin
+
+@callback(
+    Output('exp_graph','figure'),
+    Input('exp_slider','value'))
+def update_figure(selected_value):
+
+    for i, trace in enumerate(fig_exp.data):
+        trace.visible = True if i <= selected_value else False
+    return fig_exp
+
+app.run()

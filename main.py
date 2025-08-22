@@ -4,7 +4,7 @@ from scipy.special import factorial
 from dash import Dash, html, dash_table, dcc, callback, Output, Input
 import taylor
 
-N=5
+N=20
 
 def main():
     # Create an instance of the TaylorSeries class

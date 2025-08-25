@@ -3,20 +3,18 @@ import numpy as np
 from scipy.special import factorial
 from dash import Dash, html, dash_table, dcc, callback, Output, Input
 import pandas as pd
+import sympy as sp
 import taylor
-N=10
-N+=1
-ts = taylor.TaylorSeries(N=N, x_min=-5, x_max=5, num_points=100)
-df = ts.cos_taylor()
-print(type(df))
-print(df)
-df = pd.DataFrame(df)
 
-print(type(df))
 
-print(df)
+ts = taylor.TaylorSeries()
+fx = sp.sympify('sin(x)')
 
-fig = go.Figure()
-for n in range(N):
-    fig.add_trace(go.Scatter(x = ts.x_flat, y = df[n], mode = 'lines'))
-fig.show()
+powers = np.power(ts.x,ts.k)
+
+x_sym = sp.symbols('x')
+coef = np.array([(1/factorial(i))*sp.diff(fx,x_sym, i).evalf(5,subs={x_sym:0}) for i in range(ts.N*2)])
+
+print(coef)
+print(ts.sin_taylor())
+#print(ts.calc_taylor(fx))

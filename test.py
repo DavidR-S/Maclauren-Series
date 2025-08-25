@@ -7,14 +7,12 @@ import sympy as sp
 import taylor
 
 
-ts = taylor.TaylorSeries()
+ts = taylor.TaylorSeries(N=10)
 fx = sp.sympify('sin(x)')
+df = ts.calc_taylor(fx)
 
-powers = np.power(ts.x,ts.k)
+print(type(df[0][0]))
 
-x_sym = sp.symbols('x')
-coef = np.array([(1/factorial(i))*sp.diff(fx,x_sym, i).evalf(5,subs={x_sym:0}) for i in range(ts.N*2)])
-
-print(coef)
-print(ts.sin_taylor())
-#print(ts.calc_taylor(fx))
+# fig = go.Figure()
+# fig.add_trace(go.Scatter(x = ts.x_flat, y = df[0], mode = 'lines'))
+# fig.show()

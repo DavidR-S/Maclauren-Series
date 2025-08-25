@@ -21,6 +21,7 @@ fig_cos = ts.create_fig(ts.cos_taylor())
 fig_cos.update_layout(title='Taylor Series approximation for cos(x)')
 fig_sin = ts.create_fig(ts.sin_taylor())
 fig_exp = ts.create_fig(ts.exp_taylor())
+#fig_custom = ts.create_fig(ts.calc_taylor(sp.sympify('sin(x)')))
 
 app = Dash()
 
@@ -28,8 +29,9 @@ app.layout = html.Div(children=[
     html.H1(children='Maclauren series intereactive examples'),
     html.Div(dcc.Input(id='input-on-submit', type='text')),
     html.Button('Submit', id='submit-val', n_clicks=0),
-    html.Div(id='container-button-basic',
-             children='Enter a value and press submit'),
+
+    dcc.Graph(id='custom_graph', figure = go.Figure()),
+    dcc.Slider(0,N-1,1,value = 0, id='custom_slider'),
 
     dcc.Graph(id='cos_graph', figure = fig_cos),
     dcc.Slider(0,N-1,1,value = 0, id='cos_slider'),
@@ -42,23 +44,33 @@ app.layout = html.Div(children=[
 
 
     ])
-
+#set up custome figure
 @callback(
-    Output('container-button-basic', 'children'),
+    Output('custom_graph', 'figure',allow_duplicate=True),
     Input('submit-val', 'n_clicks'),
     State('input-on-submit', 'value'),
     prevent_initial_call=True
 )
-def update_output(n_clicks, value):
+def update_output(n_clicks,value):
     fx = sp.sympify(value)
-    x = sp.symbols('x')
-    eval = fx.subs(x,1)
-    return 'The input value was "{}" and the button has been clicked {} times'.format(
-        eval,
-        n_clicks
-    )
+    df = ts.calc_taylor(fx)
+    fig_custom = ts.create_fig(df)
+    return fig_custom
 
+#call back for custom graph
+@callback(
+    Output('custom_graph','figure',allow_duplicate=True),
+    Input('custom_slider','value'),
+    State('custom_graph','figure'),#pretty sure slider will break when graph is empty
+    prevent_initial_call = True
+)
+def update_figure(selected_value,current_fig):
+    current_fig = go.Figure(current_fig)
+    for i, trace in enumerate(current_fig.data):
+        trace.visible = True if i <= selected_value else False
+    return current_fig
 
+#call back for cos graph
 @callback(
     Output('cos_graph','figure'),
     Input('cos_slider','value'))
@@ -86,4 +98,4 @@ def update_figure(selected_value):
         trace.visible = True if i <= selected_value else False
     return fig_exp
 
-app.run()
+app.run(debug=True)

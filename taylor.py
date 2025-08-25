@@ -20,7 +20,8 @@ class TaylorSeries:
 
         #calculate f^(n) (0) for 0<=n<=N
         x_sym = sp.symbols('x')
-        coef = np.array([sp.diff(fx,x_sym, i).evalf(5,subs={x_sym:0}) for i in range(self.N+1)])
+        coef = np.array([(1/factorial(i))*sp.diff(fx,x_sym, i).evalf(5,subs={x_sym:0}) for i in range(self.N+1)])
+        coef = [float(i) for i in coef]
         return pd.DataFrame(np.cumsum(coef*powers, axis = 1))
         
     def exp_taylor(self):
@@ -28,10 +29,10 @@ class TaylorSeries:
         coef = 1/factorial(self.k)
         return pd.DataFrame(np.cumsum(coef*powers, axis = 1))
     
+    #fix so N is consistent on whether we ignore zero terms or not.
     def sin_taylor(self):
         powers = np.power(self.x,2*self.k+1)
         coef = ((-1)**self.k) * 1/factorial(2*self.k+1)
-        print(coef)
         return pd.DataFrame(np.cumsum(coef*powers, axis = 1))
 
     def cos_taylor(self):
